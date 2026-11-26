@@ -109,15 +109,17 @@ h1{font-size:30px;line-height:1.2;font-weight:790}
 #board[data-tool=hand]{cursor:grab}
 #board[data-tool=hand]:active{cursor:grabbing}
 .stage-badge{position:absolute;top:10px;left:10px;pointer-events:none;background:#e4ece5;color:var(--muted);border:1px solid #f7faf6;border-radius:6px;box-shadow:2px 3px 7px #81978938;padding:3px 7px;font-size:11px;font-weight:650}
-.swarm-intro{position:absolute;z-index:2;inset:0;display:grid;place-items:center;background:#e9efe7ed;pointer-events:none}
-.swarm-window{width:min(285px,calc(100% - 20px));padding:12px 15px;background:var(--surface);border:1px solid #f9fcf9;border-radius:8px;box-shadow:var(--raised)}
-.swarm-scene{display:block;width:100%;height:auto;background:#e4ece5;border:1px solid #d8e1d9;border-radius:8px;box-shadow:var(--pressed)}
-.swarm-bead{opacity:0;transition:opacity .12s}
-.swarm-bead.placed{opacity:1}
-.swarm-cursor{filter:drop-shadow(1px 1.5px 1.2px #42564955)}
-.swarm-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:9px;font-size:12px;color:var(--muted)}
-.swarm-footer strong{font-weight:700}
-.swarm-footer button{pointer-events:auto;min-height:31px;font-size:12px}
+#swarm-layer{display:block;position:fixed;z-index:6;inset:0;width:100%;height:100%;pointer-events:none}
+.swarm-controls{position:fixed;z-index:7;right:16px;bottom:16px;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 12px;background:#edf2eef5;border:1px solid #fafcf8;border-radius:8px;box-shadow:var(--raised);font-size:12px;color:var(--ink)}
+.swarm-controls progress{appearance:none;width:66px;height:7px;border:0;border-radius:5px;background:#dfe8e1;box-shadow:var(--pressed)}
+.swarm-controls progress::-webkit-progress-bar{background:transparent}
+.swarm-controls progress::-webkit-progress-value{border-radius:5px;background:#8161a7}
+.swarm-controls progress::-moz-progress-bar{border-radius:5px;background:#8161a7}
+.swarm-controls button{min-height:31px;font-size:12px}
+[data-swarm-pending="shell"]{background:transparent!important;box-shadow:none!important;border-color:transparent!important}
+[data-swarm-pending="item"]{opacity:0}
+.swarm-arrived{animation:swarm-arrive .18s ease-out both}
+@keyframes swarm-arrive{from{opacity:.25}to{opacity:1}}
 .board-foot{min-height:56px;justify-content:space-between;padding:8px 11px;gap:7px;flex-wrap:wrap}
 .board-status,.finish-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .board-status{color:var(--muted);gap:11px;font-size:12px}
@@ -201,10 +203,12 @@ dialog::backdrop{background:#233d3361}
 <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
 <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h12l4 4v13H3V5a2 2 0 0 1 2-2zM7 3v6h9V3M7 20v-7h10v7"/></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+<symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 2.8 6.5M3 6v6h6m2-4 5 4-5 4z"/></symbol>
 </svg>
 <header class="topbar"><div class="wrap">
   <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>豆豆工坊<small>Perler Beads</small></span></div>
   <div class="header-actions">
+    <button type="button" class="action" id="swarm-replay" aria-label="重播光标动画" title="重播光标动画"><svg class="icon" aria-hidden="true"><use href="#i-replay"/></svg></button>
     <button class="action" id="sound" aria-label="音效" aria-pressed="true" title="音效"><svg class="icon"><use href="#i-sound"/></svg></button>
     <button class="button" id="gallery-open"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>我的作品</button>
   </div>
@@ -234,16 +238,6 @@ dialog::backdrop{background:#233d3361}
       </div>
       <div class="stage">
         <canvas id="board" tabindex="0" aria-label="拼豆画板"></canvas><span class="stage-badge" id="stage-badge"></span>
-        <div class="swarm-intro" id="swarm-intro" hidden>
-          <div class="swarm-window">
-            <svg class="swarm-scene" viewBox="0 0 248 144" aria-hidden="true">
-              <defs><pattern id="swarm-pegs" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="1.3" fill="#b5c6ba"/><circle cx="5.7" cy="5.6" r="1" fill="#f8faf4"/></pattern></defs>
-              <rect width="248" height="144" fill="url(#swarm-pegs)"/>
-              <g id="swarm-beads"></g><g id="swarm-cursors"></g>
-            </svg>
-            <div class="swarm-footer"><strong id="swarm-status">正在准备画板…</strong><button type="button" class="button" id="swarm-skip">跳过动画</button></div>
-          </div>
-        </div>
       </div>
       <div class="board-foot">
         <div class="board-status"><output class="coordinate" id="coord" aria-label="当前坐标">— , —</output><output class="selected-color" id="selected-color" aria-label="选中颜色"><i></i><span></span></output><span id="count"></span></div>
@@ -268,6 +262,12 @@ dialog::backdrop{background:#233d3361}
 </main>
 <dialog id="modal" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title"></h2><button type="button" class="action" id="modal-close" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><div id="modal-body"></div></dialog>
 <p class="toast" id="toast" role="status" hidden></p>
+<canvas id="swarm-layer" aria-hidden="true" hidden></canvas>
+<div class="swarm-controls" id="swarm-controls" hidden>
+  <span>80 个光标</span>
+  <progress id="swarm-progress" aria-label="工作台拼装进度" value="0" max="100"></progress>
+  <button type="button" class="button" id="swarm-skip">跳过动画</button>
+</div>
 <script>
 const $ = selector => document.querySelector(selector);
 const icon = name => '<svg class="icon" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
@@ -405,6 +405,7 @@ function moreAccurate(a,b) {
 const board = $('#board');
 const ctx = board.getContext('2d');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let swarmBoard=null;
 const effects = new Map();
 const tiles = new Map();
 let viewWidth=0, viewHeight=0, frame=0;
@@ -566,6 +567,7 @@ function draw(now) {
   frame=0;
   const g=geometry(), {cell}=g;
   ctx.clearRect(0,0,viewWidth,viewHeight);
+  if (swarmBoard && !swarmBoard.rim) return;
   ctx.save();
   ctx.translate(g.x,g.y);
   const rim=ctx.createLinearGradient(-9,-9,g.side+9,g.side+9);
@@ -587,6 +589,7 @@ function draw(now) {
     const left=x*cell,top=y*cell,cx=left+cell/2,cy=top+cell/2;
     const expected=state.target?.[y]?.[x] ?? -1;
     const id=y*state.size+x;
+    if (swarmBoard && !swarmBoard.cells[id]) return;
     const effect=effects.get(id);
     const age=effect ? now-effect.at : Infinity;
     if (effect && age>330) effects.delete(id);
@@ -1136,98 +1139,218 @@ function openImport() {
     toast('图纸准备好了。');
   };
 }
-// Native scene and task scheduler inspired by swarm-cursors and Joel Califa's Swarm.
-function playSwarmIntro() {
-  const key='bead-studio-swarm-seen-v1';
-  if (reduceMotion.matches || document.hidden) return;
+// Each cursor follows its own randomized route and reveals real UI or peg groups on arrival.
+function playSwarmIntro(replay=false) {
+  const key='bead-studio-screen-swarm-v1';
+  if (reduceMotion.matches || document.hidden || swarmBoard || state.ironing) return;
   try {
-    if (sessionStorage.getItem(key)) return;
+    if (!replay && sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key,'1');
-  } catch { /* The intro still works without session storage. */ }
+  } catch { /* Keep the intro usable with storage disabled. */ }
 
-  const intro=$('#swarm-intro'), skip=$('#swarm-skip');
-  const beadLayer=$('#swarm-beads'), cursorLayer=$('#swarm-cursors');
-  const ns='http://www.w3.org/2000/svg';
-  const grid=patternGrid(patterns[0],16);
-  const starts=[[22,24],[226,21],[22,120],[226,119]];
-  const colors=['#7755a7','#417766','#a45170','#835833'];
-  const workers=starts.map(([x,y],i)=>({start:{x,y},color:colors[i],tasks:[]}));
-
-  grid.forEach((row,y)=>row.forEach((color,x)=>{
-    if (color<0) return;
-    const point={x:124+(x-7)*8,y:72+(y-7)*8};
-    const bead=document.createElementNS(ns,'g');
-    bead.setAttribute('class','swarm-bead');
-    bead.setAttribute('transform','translate('+point.x+' '+point.y+')');
-    bead.innerHTML='<circle r="3.6" cy=".65" fill="#7d4e6648"/><circle r="3.45" fill="'+builtin[color]+'"/><circle r="1.06" fill="#f9e5ec"/>';
-    beadLayer.append(bead);
-    const quadrant=(x<8?0:1)+(y<8?0:2);
-    workers[quadrant].tasks.push({...point,bead});
-  }));
-
-  workers.forEach((worker,i)=>{
-    worker.tasks.sort((a,b)=>i<2 ? a.y-b.y || a.x-b.x : b.y-a.y || b.x-a.x);
-    const cursor=document.createElementNS(ns,'g');
-    cursor.setAttribute('class','swarm-cursor');
-    cursor.innerHTML='<path d="M0 0 4 15 7 10 13 9Z" fill="'+worker.color+'" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/><circle cx="13" cy="15" r="3" fill="'+worker.color+'"/>';
-    cursorLayer.append(cursor);
-    worker.element=cursor;
-    worker.done=0;
-  });
-
-  const events=new AbortController();
-  const options={capture:true,signal:events.signal};
-  let frame,start;
-  function finish(restoreFocus=false) {
-    events.abort();
-    cancelAnimationFrame(frame);
-    intro.hidden=true;
-    beadLayer.replaceChildren();
-    cursorLayer.replaceChildren();
-    if (restoreFocus) board.focus({preventScroll:true});
+  const layer=$('#swarm-layer'), controls=$('#swarm-controls'), skip=$('#swarm-skip');
+  const progress=$('#swarm-progress'), replayButton=$('#swarm-replay');
+  const pen=layer.getContext('2d');
+  if (!pen) return;
+  const width=innerWidth,height=innerHeight,dpr=Math.min(devicePixelRatio||1,2);
+  const scrollOrigin={x:scrollX,y:scrollY};
+  const random=(min,max)=>min+Math.random()*(max-min);
+  const point=()=>({x:random(8,width-18),y:random(8,height-20)});
+  const center=(x,y)=>x<0||x>width||y<0||y>height ? point() : {x,y};
+  const tasks=[], pending=[];
+  function task(target,min,max,reveal) {
+    tasks.push({target,at:random(min,max),reveal});
   }
-  // The overlay doesn't intercept drawing or editing. The first interaction dismisses it.
-  document.addEventListener('pointerdown',event=>{
-    if (!skip.contains(event.target)) finish();
-  },options);
+  const shells='.topbar,.panel,.stage,.mode,.size-list,.color-form,#progress-track';
+  const parts='.brand-mark,.brand>span:last-child,h1,.panel-title,.board-head h2,#stage-badge,.color-group h3,.progress-label>*,.progress-stats>*,.ghost-setting,.board-status>*,#zoom-value,button,#hex';
+  for (const [selector,kind,min,max] of [[shells,'shell',410,930],[parts,'item',1050,2530]]) {
+    for (const element of document.querySelectorAll(selector)) {
+      if (element.closest('#modal,#swarm-controls') || !element.getClientRects().length) continue;
+      const rect=element.getBoundingClientRect();
+      const target=center(rect.left+rect.width*random(.25,.65),rect.top+rect.height*random(.3,.65));
+      element.dataset.swarmPending=kind;
+      pending.push(element);
+      task(target,min,max,()=>{
+        delete element.dataset.swarmPending;
+        if (kind==='item') element.classList.add('swarm-arrived');
+      });
+    }
+  }
+  const size=state.size;
+  const assembly={rim:false,cells:new Uint8Array(size*size)};
+  swarmBoard=assembly;
+  const g=geometry(), bounds=board.getBoundingClientRect();
+  const boardPoint=(x,y)=>center(bounds.left+g.x+x*g.cell,bounds.top+g.y+y*g.cell);
+  task(boardPoint(size/2,size/2),690,910,()=>{assembly.rim=true;invalidate();});
+  for(let y=0;y<size;y+=3) {
+    for(let x=0;x<size;x+=3) {
+      task(boardPoint(x+1.25,y+1.25),1050,2820,()=>{
+        for(let row=y;row<Math.min(y+3,size);row++) {
+          assembly.cells.fill(1,row*size+x,row*size+Math.min(x+3,size));
+        }
+        invalidate();
+      });
+    }
+  }
+
+  // Paint each cursor once into a small sprite, including its lens highlight and colored glow.
+  const outlines=[
+    [[0,0],[3,16],[7,11],[13,10]],
+    [[0,0],[1,15],[5,11],[9,15],[12,12],[8,8],[14,7]],
+    [[0,0],[6,15],[8,9],[15,6]]
+  ];
+  function makeCursor(hue) {
+    const sprite=document.createElement('canvas');
+    sprite.width=sprite.height=64;
+    const brush=sprite.getContext('2d');
+    const scale=random(.66,1.2);
+    brush.translate(22,20);brush.scale(scale,scale);
+    const fill=brush.createLinearGradient(0,0,13,15);
+    fill.addColorStop(0,'hsl('+hue+' 78% 73%)');
+    fill.addColorStop(1,'hsl('+hue+' 60% 37%)');
+    brush.shadowColor='hsla('+hue+',90%,56%,'+random(.28,.86)+')';
+    brush.shadowBlur=random(3,14);
+    brush.beginPath();
+    outlines[Math.floor(random(0,outlines.length))].forEach(([x,y],i)=>i?brush.lineTo(x,y):brush.moveTo(x,y));
+    brush.closePath();
+    brush.fillStyle=fill;brush.fill();
+    brush.shadowBlur=0;brush.lineWidth=1.2;brush.lineJoin='round';
+    brush.strokeStyle='#fffdf4';brush.stroke();
+    if (Math.random()<.34) {
+      brush.strokeStyle='hsl('+hue+' 75% 48%)';brush.beginPath();
+      brush.moveTo(13,1);brush.lineTo(19,1);brush.moveTo(16,-2);brush.lineTo(16,4);brush.stroke();
+    }
+    return sprite;
+  }
+  const workers=Array.from({length:80},(_,i)=>{
+    const hue=Math.round((i*137.508+random(0,38))%360), start=point(), next=point(), at=random(210,490);
+    return {
+      hue,sprite:makeCursor(hue),stops:[{...start,at:0},{...next,at}],available:at,
+      segment:0,tail:[],phase:random(0,6.28),wave:random(.013,.029),swing:random(2,12)
+    };
+  });
+  tasks.sort((a,b)=>a.at-b.at);
+  for(const job of tasks) {
+    const ready=workers.filter(worker=>worker.available+115<=job.at);
+    const worker=ready.length?ready[Math.floor(random(0,ready.length))]:workers.reduce((a,b)=>a.available<b.available?a:b);
+    job.at=Math.max(job.at,worker.available+85);
+    job.hue=worker.hue;
+    worker.stops.push({...job.target,at:job.at});
+    worker.available=job.at;
+  }
+  tasks.sort((a,b)=>a.at-b.at);
+  const duration=Math.max(3300,tasks.at(-1).at+260);
+  for(const worker of workers) {
+    const path=[worker.stops[0]];
+    for(const stop of worker.stops.slice(1)) {
+      let t=path.at(-1).at+random(145,310);
+      while(t<stop.at-170) {
+        path.push({...point(),at:t});
+        t+=random(160,390);
+      }
+      path.push(stop);
+    }
+    let time=path.at(-1).at+random(150,290);
+    while(time<duration+300) {
+      path.push({...point(),at:time});
+      time+=random(160,375);
+    }
+    if(path.at(-1).at<duration) path.push({...point(),at:duration+200});
+    worker.stops=path;
+  }
+  const controller=new AbortController();
+  const options={capture:true,signal:controller.signal};
+  const flashes=[];
+  let frame=0,start,finished=0,lastTrail=-Infinity;
+  function finish(restoreFocus=false) {
+    controller.abort();
+    cancelAnimationFrame(frame);
+    layer.hidden=true;controls.hidden=true;
+    delete layer.dataset.activeCursors;
+    for(const element of pending) {
+      delete element.dataset.swarmPending;
+      element.classList.remove('swarm-arrived');
+    }
+    swarmBoard=null;invalidate();
+    if(restoreFocus) (replay&&!replayButton.hidden?replayButton:board).focus({preventScroll:true});
+  }
+  function drawWorker(worker,time,trailFrame) {
+    const stops=worker.stops;
+    while(worker.segment<stops.length-2 && stops[worker.segment+1].at<=time) worker.segment++;
+    const a=stops[worker.segment],b=stops[worker.segment+1];
+    const t=Math.min(1,(time-a.at)/(b.at-a.at));
+    const mix=t*t*(3-2*t), wave=Math.sin(Math.PI*t)*worker.swing;
+    const x=a.x+(b.x-a.x)*mix+Math.sin(time*worker.wave+worker.phase)*wave;
+    const y=a.y+(b.y-a.y)*mix+Math.cos(time*worker.wave*.81+worker.phase)*wave;
+    if(trailFrame) {
+      worker.tail.push({x,y});
+      if(worker.tail.length>4) worker.tail.shift();
+    }
+    if(worker.tail.length) {
+      pen.beginPath();
+      const p=worker.tail[0];
+      pen.moveTo(p.x,p.y);
+      for(const previous of worker.tail.slice(1)) pen.lineTo(previous.x,previous.y);
+      pen.lineTo(x,y);pen.lineWidth=1.6;
+      pen.strokeStyle='hsla('+worker.hue+',71%,48%,.22)';pen.stroke();
+    }
+    pen.drawImage(worker.sprite,x-22,y-20);
+  }
+  function animate(now) {
+    start??=now;
+    const time=now-start;
+    while(finished<tasks.length && tasks[finished].at<=time) {
+      const job=tasks[finished++];job.reveal();flashes.push({...job.target,hue:job.hue,at:time});
+    }
+    progress.value=100*finished/tasks.length;
+    pen.clearRect(0,0,width,height);
+    pen.globalAlpha=Math.max(0,Math.min(1,(duration-time)/230));
+    const trailFrame=time-lastTrail>=38;
+    for(const worker of workers) drawWorker(worker,time,trailFrame);
+    if(trailFrame) lastTrail=time;
+    for(let i=flashes.length-1;i>=0;i--) {
+      const {x,y,hue,at}=flashes[i], fade=(time-at)/215;
+      if(fade>=1) {flashes.splice(i,1);continue;}
+      pen.beginPath();pen.arc(x,y,3+10*fade,0,Math.PI*2);
+      pen.strokeStyle='hsla('+hue+',64%,43%,'+(.59*(1-fade))+')';pen.lineWidth=1.35;pen.stroke();
+    }
+    pen.globalAlpha=1;
+    if(time<duration) frame=requestAnimationFrame(animate);
+    else finish(document.activeElement===skip);
+  }
+
+  // Complete the reveal before any input reaches the editor.
+  document.addEventListener('pointerdown',event=>{if(!controls.contains(event.target)) finish();},options);
   document.addEventListener('keydown',event=>{
-    if (event.key==='Escape') finish(document.activeElement===skip);
-    else if (event.target===board) finish();
+    if(!controls.contains(event.target) || event.key==='Escape') finish(document.activeElement===skip);
   },options);
+  window.addEventListener('resize',()=>{
+    if (innerWidth!==width || innerHeight!==height) finish(document.activeElement===skip);
+  },options);
+  window.addEventListener('scroll',()=>{
+    if (scrollX!==scrollOrigin.x || scrollY!==scrollOrigin.y) finish(document.activeElement===skip);
+  },options);
+  window.addEventListener('pagehide',()=>finish(),options);
   document.addEventListener('visibilitychange',()=>{if(document.hidden) finish();},options);
   reduceMotion.addEventListener('change',event=>{if(event.matches) finish(document.activeElement===skip);},options);
   skip.addEventListener('click',()=>finish(true),options);
-  intro.hidden=false;
-
-  const placeTime=1400,endTime=1770;
-  function animate(now) {
-    start ??= now;
-    const elapsed=now-start;
-    for (const [index,worker] of workers.entries()) {
-      const {tasks}=worker;
-      const delay=index*43;
-      const progress=Math.max(0,Math.min(1,(elapsed-delay)/(placeTime-delay)));
-      const position=progress*tasks.length;
-      while(worker.done<Math.floor(position)) tasks[worker.done++].bead.classList.add('placed');
-      const from=tasks[worker.done-1] || worker.start;
-      const to=tasks[worker.done] || worker.start;
-      const fraction=progress===1 ? Math.min(1,(elapsed-placeTime)/(endTime-placeTime)) : position-worker.done;
-      const ease=fraction*fraction*(3-2*fraction);
-      const x=from.x+(to.x-from.x)*ease;
-      const y=from.y+(to.y-from.y)*ease;
-      worker.element.setAttribute('transform','translate('+x+' '+y+')');
-      worker.element.style.opacity=String(progress===1?1-fraction:1);
-    }
-    if (elapsed<endTime) frame=requestAnimationFrame(animate);
-    else finish(document.activeElement===skip);
-  }
-  frame=requestAnimationFrame(animate);
+  layer.width=Math.ceil(width*dpr);layer.height=Math.ceil(height*dpr);
+  pen.setTransform(dpr,0,0,dpr,0,0);pen.lineCap='round';
+  progress.value=0;layer.dataset.activeCursors=String(workers.length);
+  layer.hidden=false;controls.hidden=false;
+  invalidate();frame=requestAnimationFrame(animate);
 }
 initControls();
 loadDraft();
 renderPalette();renderLevels();refresh();
 resize();
 playSwarmIntro();
+$('#swarm-replay').onclick=()=>playSwarmIntro(true);
+function updateReplayPreference() {
+  $('#swarm-replay').hidden=reduceMotion.matches;
+}
+updateReplayPreference();
+reduceMotion.addEventListener('change',updateReplayPreference);
 new ResizeObserver(()=>{resize();constrainOffset();renderViewOptions();}).observe(board);
 setInterval(updateTimer,500);
 window.addEventListener('pagehide',()=>{save();});
