@@ -159,18 +159,68 @@ dialog::backdrop{background:#233d3361}
 .field input[type=file]{font-size:12px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .preview{display:grid;place-items:center;min-height:108px;margin-top:10px;border:1px solid var(--line);border-radius:7px;background:#e6ede8;box-shadow:var(--pressed)}
-.preview canvas,.art-thumb{width:96px;height:96px;image-rendering:pixelated}
+.preview canvas{width:96px;height:96px;image-rendering:pixelated}
 .preview-text{color:var(--muted);font-size:12px}
 .score-stars{text-align:center;font-size:30px;color:#ad642a;margin:2px 0 9px}
 .score-grid{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;background:#e3ebe4;border-radius:8px;padding:9px 3px;gap:4px;box-shadow:var(--pressed)}
 .score-grid span{display:block;color:var(--muted);font-size:12px}
 .score-grid strong{font-size:17px;display:block}
-.gallery{padding:0;margin:0;list-style:none}
-.gallery li{display:grid;grid-template-columns:47px minmax(0,1fr) auto auto;gap:7px;align-items:center;border-top:1px solid var(--line);padding:7px 0}
-.gallery .art-thumb{width:45px;height:45px;background:#f2eafa;border-radius:7px}
-.gallery strong{display:block;overflow-wrap:anywhere}
-.gallery small{color:var(--muted)}
-.gallery .action{width:34px;min-height:34px}
+a.button{text-decoration:none;color:inherit}
+a.button:focus-visible{outline:2px solid var(--purple);outline-offset:3px}
+#gallery-page{width:min(1220px,calc(100% - 64px));padding-bottom:36px}
+.gallery-header{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:28px 0 18px}
+.gallery-header h1{font-size:32px}
+.gallery-total,.gallery-index,.gallery-data dt{color:var(--muted);font-variant-numeric:tabular-nums}
+.gallery-display{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,305px);gap:32px;align-items:center}
+.gallery-frame{
+  position:relative;display:grid;place-items:center;min-width:0;min-height:370px;height:min(57vh,516px);
+  border:1px solid #fafaf2;border-radius:8px;overflow:hidden;
+  background:radial-gradient(ellipse at 45% 32%,#fbf8ed 12%,#eeece2 77%);
+  box-shadow:inset 5px 6px 15px #61796a34,inset -5px -6px 14px #fffdf3cc;
+}
+.gallery-art{display:block;width:min(68%,310px);height:auto;aspect-ratio:1;max-height:72%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 7px 12px #5e495334)}
+.gallery-index{font-size:12px;margin-bottom:6px}
+.gallery-details h2{font-size:28px;line-height:1.2;overflow-wrap:anywhere}
+.gallery-data{display:grid;gap:9px;margin:18px 0}
+.gallery-data div{display:flex;align-items:baseline;gap:14px;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.gallery-data dt{font-size:12px}
+.gallery-data dd{margin:0;font-weight:650;text-align:right}
+.gallery-actions{display:flex;gap:9px;flex-wrap:wrap}
+.gallery-nav{display:flex;gap:8px;margin-top:16px}
+.gallery-nav .action,.gallery-actions .action{min-height:40px;width:40px}
+.gallery-nav .action:disabled{box-shadow:var(--pressed)}
+.gallery-collection{margin-top:22px}
+.gallery-collection h2{font-size:15px;margin-bottom:8px}
+.gallery-list{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;
+  margin:0;padding:0;list-style:none;
+}
+.gallery-tile{
+  display:grid;justify-items:center;align-content:center;gap:5px;width:100%;min-height:96px;
+  padding:7px 5px;background:var(--key);border:1px solid #f6fbf5;border-radius:8px;box-shadow:var(--raised);
+}
+.gallery-tile[aria-current=true]{border-color:#bfb0d3;background:#e5deee;color:var(--purple);box-shadow:inset 2px 3px 7px #907ca344}
+.gallery-tile:hover:not([aria-current=true]){background:#f5f8f1}
+.gallery-tile canvas{width:52px;height:52px;image-rendering:pixelated}
+.gallery-tile strong{font-size:12px;overflow-wrap:anywhere;max-width:100%}
+.gallery-empty{
+  min-height:330px;display:grid;place-content:center;justify-items:center;gap:13px;
+  border-block:1px solid var(--line);text-align:center;color:var(--muted);
+}
+.gallery-empty .icon{width:34px;height:34px;color:var(--purple)}
+@media(max-width:720px){
+  #gallery-page{width:calc(100% - 24px)}
+  .gallery-header{margin:17px 0 12px}
+  .gallery-header h1{font-size:25px}
+  .gallery-display{grid-template-columns:minmax(0,1fr);gap:14px}
+  .gallery-frame{height:auto;aspect-ratio:1.19;min-height:0}
+  .gallery-details h2{font-size:22px}
+  .gallery-data{margin:11px 0}
+  .gallery-details-footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .gallery-nav{margin-top:0}
+  .gallery-collection{margin-top:16px}
+  .gallery-list{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
 @media(max-width:1120px){.wrap{width:calc(100% - 34px)}.workspace{grid-template-columns:minmax(183px,208px) minmax(0,1fr) minmax(202px,224px);gap:10px}.rail-panel{padding:10px}.swatches{gap:3px}.tool-grid .action{min-height:34px}.stage{min-height:370px}}
 @media(max-width:860px){.workspace{grid-template-columns:minmax(176px,200px) minmax(0,1fr)}.right-rail{grid-column:1/-1;grid-template-columns:minmax(170px,200px) minmax(0,1fr)}.levels{grid-template-columns:repeat(3,1fr)}}
@@ -204,17 +254,20 @@ dialog::backdrop{background:#233d3361}
 <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h12l4 4v13H3V5a2 2 0 0 1 2-2zM7 3v6h9V3M7 20v-7h10v7"/></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
 <symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 2.8 6.5M3 6v6h6m2-4 5 4-5 4z"/></symbol>
+<symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
 </svg>
 <header class="topbar"><div class="wrap">
   <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>豆豆工坊<small>Perler Beads</small></span></div>
   <div class="header-actions">
     <button type="button" class="action" id="swarm-replay" aria-label="重播光标动画" title="重播光标动画"><svg class="icon" aria-hidden="true"><use href="#i-replay"/></svg></button>
     <button class="action" id="sound" aria-label="音效" aria-pressed="true" title="音效"><svg class="icon"><use href="#i-sound"/></svg></button>
-    <button class="button" id="gallery-open"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>我的作品</button>
+    <a class="button" id="gallery-open" href="#gallery"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg>我的作品</a>
+    <a class="button" id="gallery-back" href="#studio" hidden><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg>返回工作台</a>
   </div>
 </div></header>
-<main class="wrap">
-  <div class="title-row"><h1>拼豆工作台</h1><div class="mode" role="group" aria-label="创作模式"><button id="mode-free" type="button" aria-pressed="false">自由创作</button><button id="mode-pattern" type="button" aria-pressed="true">图纸闯关</button></div></div>
+<main class="wrap" id="studio-page">
+  <div class="title-row"><h1 id="studio-title" tabindex="-1">拼豆工作台</h1><div class="mode" role="group" aria-label="创作模式"><button id="mode-free" type="button" aria-pressed="false">自由创作</button><button id="mode-pattern" type="button" aria-pressed="true">图纸闯关</button></div></div>
   <div class="workspace">
     <div class="left-rail">
       <section class="panel rail-panel tools-panel" aria-labelledby="tools-heading">
@@ -258,6 +311,41 @@ dialog::backdrop{background:#233d3361}
         <button class="button import-link" id="import-open"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>图片转图纸</button>
       </section>
     </aside>
+  </div>
+</main>
+<main class="wrap" id="gallery-page" aria-labelledby="gallery-title" hidden>
+  <header class="gallery-header"><h1 id="gallery-title" tabindex="-1">我的作品</h1><span class="gallery-total" id="gallery-total"></span></header>
+  <div class="gallery-empty" id="gallery-empty" hidden>
+    <svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>
+    <p>还没有保存的作品</p>
+    <a class="button" href="#studio">返回工作台</a>
+  </div>
+  <div id="gallery-exhibits" hidden>
+    <section class="gallery-display" aria-labelledby="gallery-name">
+      <figure class="gallery-frame"><canvas class="gallery-art" id="gallery-art" role="img"></canvas></figure>
+      <div class="gallery-details">
+        <div aria-live="polite"><p class="gallery-index" id="gallery-index"></p><h2 id="gallery-name"></h2></div>
+        <dl class="gallery-data">
+          <div><dt>画板尺寸</dt><dd id="gallery-size"></dd></div>
+          <div><dt>状态</dt><dd id="gallery-status"></dd></div>
+          <div id="gallery-date-row"><dt>保存日期</dt><dd id="gallery-date"></dd></div>
+        </dl>
+        <div class="gallery-details-footer">
+          <div class="gallery-actions">
+            <button type="button" class="button primary" id="gallery-download"><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg>下载 PNG</button>
+            <button type="button" class="action" id="gallery-delete" aria-label="删除这件作品" title="删除这件作品"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></button>
+          </div>
+          <div class="gallery-nav" id="gallery-nav">
+            <button type="button" class="action" id="gallery-prev" aria-label="上一件作品" title="上一件作品"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button>
+            <button type="button" class="action" id="gallery-next" aria-label="下一件作品" title="下一件作品"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="gallery-collection" id="gallery-collection" aria-labelledby="gallery-list-title">
+      <h2 id="gallery-list-title">作品册</h2>
+      <ul class="gallery-list" id="gallery-list"></ul>
+    </section>
   </div>
 </main>
 <dialog id="modal" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title"></h2><button type="button" class="action" id="modal-close" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><div id="modal-body"></div></dialog>
@@ -496,7 +584,7 @@ function refresh() {
   renderViewOptions();
   invalidate();
 }
-// Draw a crisp PNG or thumbnail from color indices. Crop only the level thumbnails.
+// Crop wall displays and thumbnails, while keeping the original grid for export.
 function paintImage(canvas,grid,colors,crop=false,white=false,scale=1) {
   const used=[];
   grid.forEach((row,y)=>row.forEach((index,x)=>{ if (index>=0 && colors[index]) used.push({x,y,index}); }));
@@ -850,32 +938,65 @@ function saveArt() {
     const grid=state.grid.map(row=>row.slice());
     const colors=palette.slice();
     works.unshift({name,grid,colors,fused:state.fused===1,date:Date.now()});
+    galleryIndex=0;
     const persisted=save();
     modal.close();
     if (persisted) toast('已保存到我的作品。');
   };
 }
-function openGallery() {
-  if (!works.length) {
-    openModal('我的作品','<p class="modal-copy">还没有保存的作品。</p>');
-    return;
+let galleryIndex=0;
+const galleryDate=new Intl.DateTimeFormat('zh-CN',{dateStyle:'medium'});
+function updateExhibit(index) {
+  galleryIndex=Math.max(0,Math.min(index,works.length-1));
+  const work=works[galleryIndex];
+  if (!work) return;
+  const art=$('#gallery-art');
+  paintImage(art,work.grid,work.colors,true);
+  art.setAttribute('aria-label',work.name);
+  $('#gallery-name').textContent=work.name;
+  $('#gallery-index').textContent=(galleryIndex+1)+' / '+works.length;
+  $('#gallery-size').textContent=work.grid.length+' × '+work.grid.length;
+  $('#gallery-status').textContent=work.fused?'已熨烫':'拼豆设计';
+  $('#gallery-date-row').hidden=!Number.isFinite(work.date);
+  if (Number.isFinite(work.date)) $('#gallery-date').textContent=galleryDate.format(work.date);
+  $('#gallery-prev').disabled=galleryIndex===0;
+  $('#gallery-next').disabled=galleryIndex===works.length-1;
+  for (const button of $('#gallery-list').querySelectorAll('[data-work]')) {
+    button.setAttribute('aria-current',String(Number(button.dataset.work)===galleryIndex));
   }
-  openModal('我的作品','<ul class="gallery"></ul>');
-  const gallery=modalBody.querySelector('ul');
-  for (const [index,work] of works.entries()) {
+}
+function renderGallery() {
+  const count=works.length;
+  $('#gallery-total').textContent=count+' 件作品';
+  $('#gallery-empty').hidden=Boolean(count);
+  $('#gallery-exhibits').hidden=!count;
+  $('#gallery-nav').hidden=count<2;
+  $('#gallery-collection').hidden=count<2;
+  const items=count<2?[]:works.map((work,index)=>{
     const item=document.createElement('li');
-    item.innerHTML='<canvas class="art-thumb" aria-hidden="true"></canvas><div><strong></strong><small></small></div>'+
-      mini('work-down-'+index,'down','下载作品')+mini('work-remove-'+index,'trash','删除作品');
-    item.querySelector('strong').textContent=work.name;
-    item.querySelector('small').textContent=work.grid.length+'×'+work.grid.length+' · '+(work.fused?'已熨烫':'拼豆设计');
-    gallery.append(item);
-    paintImage(item.querySelector('canvas'),work.grid,work.colors);
-    $('#work-down-'+index).onclick=()=>downloadOptions(work.grid,work.colors,work.name);
-    $('#work-remove-'+index).onclick=()=>{
-      openModal('删除这件作品？','<div class="modal-actions"><button class="button" type="button" id="keep-work">保留</button><button class="button danger" type="button" id="remove-work">确认删除</button></div>');
-      $('#keep-work').onclick=openGallery;
-      $('#remove-work').onclick=()=>{works.splice(index,1);save();openGallery();};
-    };
+    item.innerHTML='<button class="gallery-tile" type="button"><canvas aria-hidden="true"></canvas><strong></strong></button>';
+    const button=item.firstElementChild;
+    button.dataset.work=index;
+    button.querySelector('strong').textContent=work.name;
+    paintImage(button.querySelector('canvas'),work.grid,work.colors,true);
+    return item;
+  });
+  $('#gallery-list').replaceChildren(...items);
+  updateExhibit(galleryIndex);
+}
+function showPage(moveFocus=false) {
+  const gallery=location.hash==='#gallery';
+  $('#studio-page').hidden=gallery;
+  $('#gallery-page').hidden=!gallery;
+  $('#gallery-open').hidden=gallery;
+  $('#gallery-back').hidden=!gallery;
+  $('#swarm-replay').hidden=gallery || reduceMotion.matches;
+  document.title=(gallery?'我的作品':'豆豆工坊')+' · 拼豆工作台';
+  if (gallery) renderGallery();
+  else resize();
+  if (moveFocus) {
+    window.scrollTo(0,0);
+    $(gallery?'#gallery-title':'#studio-title').focus({preventScroll:true});
   }
 }
 const pointers=new Map();
@@ -1010,6 +1131,13 @@ board.addEventListener('keydown',event=>{
 });
 document.addEventListener('keydown',event=>{
   if (modal.open || event.target.matches('input,textarea,select')) return;
+  if (location.hash==='#gallery') {
+    if (works.length>1 && (event.key==='ArrowLeft' || event.key==='ArrowRight')) {
+      event.preventDefault();
+      updateExhibit(galleryIndex+(event.key==='ArrowRight'?1:-1));
+    }
+    return;
+  }
   if (event.code==='Space' && !event.target.matches('button')) {space=true;event.preventDefault();}
   if ((event.ctrlKey || event.metaKey) && ['z','y'].includes(event.key.toLowerCase())) {
     event.preventDefault();history(event.shiftKey || event.key.toLowerCase()==='y'?'redo':'undo');
@@ -1142,7 +1270,7 @@ function openImport() {
 // Each cursor follows its own randomized route and reveals real UI or peg groups on arrival.
 function playSwarmIntro(replay=false) {
   const key='bead-studio-screen-swarm-v1';
-  if (reduceMotion.matches || document.hidden || swarmBoard || state.ironing) return;
+  if (reduceMotion.matches || document.hidden || swarmBoard || state.ironing || location.hash==='#gallery') return;
   try {
     if (!replay && sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key,'1');
@@ -1162,7 +1290,7 @@ function playSwarmIntro(replay=false) {
     tasks.push({target,at:random(min,max),reveal});
   }
   const shells='.topbar,.panel,.stage,.mode,.size-list,.color-form,#progress-track';
-  const parts='.brand-mark,.brand>span:last-child,h1,.panel-title,.board-head h2,#stage-badge,.color-group h3,.progress-label>*,.progress-stats>*,.ghost-setting,.board-status>*,#zoom-value,button,#hex';
+  const parts='.brand-mark,.brand>span:last-child,h1,.panel-title,.board-head h2,#stage-badge,.color-group h3,.progress-label>*,.progress-stats>*,.ghost-setting,.board-status>*,#zoom-value,button,a.button,#hex';
   for (const [selector,kind,min,max] of [[shells,'shell',410,930],[parts,'item',1050,2530]]) {
     for (const element of document.querySelectorAll(selector)) {
       if (element.closest('#modal,#swarm-controls') || !element.getClientRects().length) continue;
@@ -1331,6 +1459,7 @@ function playSwarmIntro(replay=false) {
     if (scrollX!==scrollOrigin.x || scrollY!==scrollOrigin.y) finish(document.activeElement===skip);
   },options);
   window.addEventListener('pagehide',()=>finish(),options);
+  window.addEventListener('hashchange',()=>finish(),options);
   document.addEventListener('visibilitychange',()=>{if(document.hidden) finish();},options);
   reduceMotion.addEventListener('change',event=>{if(event.matches) finish(document.activeElement===skip);},options);
   skip.addEventListener('click',()=>finish(true),options);
@@ -1344,14 +1473,18 @@ initControls();
 loadDraft();
 renderPalette();renderLevels();refresh();
 resize();
+showPage();
 playSwarmIntro();
 $('#swarm-replay').onclick=()=>playSwarmIntro(true);
 function updateReplayPreference() {
-  $('#swarm-replay').hidden=reduceMotion.matches;
+  $('#swarm-replay').hidden=reduceMotion.matches || location.hash==='#gallery';
 }
 updateReplayPreference();
 reduceMotion.addEventListener('change',updateReplayPreference);
-new ResizeObserver(()=>{resize();constrainOffset();renderViewOptions();}).observe(board);
+new ResizeObserver(()=>{
+  if ($('#studio-page').hidden) return;
+  resize();constrainOffset();renderViewOptions();
+}).observe(board);
 setInterval(updateTimer,500);
 window.addEventListener('pagehide',()=>{save();});
 $('#mode-free').onclick=()=>{if(state.choice!=='free') switchBoard('free',state.size);};
@@ -1397,7 +1530,30 @@ $('#ghost').onchange=event=>{state.ghost=event.target.checked;save();invalidate(
 $('#iron').onclick=iron;
 $('#export').onclick=()=>downloadOptions(state.grid,palette,currentPattern()?.name || '我的拼豆画');
 $('#save-art').onclick=saveArt;
-$('#gallery-open').onclick=openGallery;
+window.addEventListener('hashchange',()=>{
+  if (modal.open) modal.close();
+  showPage(true);
+});
+$('#gallery-list').onclick=event=>{
+  const button=event.target.closest('[data-work]');
+  if (button) updateExhibit(Number(button.dataset.work));
+};
+$('#gallery-prev').onclick=()=>updateExhibit(galleryIndex-1);
+$('#gallery-next').onclick=()=>updateExhibit(galleryIndex+1);
+$('#gallery-download').onclick=()=>{
+  const work=works[galleryIndex];
+  downloadOptions(work.grid,work.colors,work.name);
+};
+$('#gallery-delete').onclick=()=>{
+  const work=works[galleryIndex];
+  openModal('删除这件作品？','<p class="modal-copy" id="delete-work-name"></p><div class="modal-actions"><button class="button" type="button" data-dismiss>保留</button><button class="button danger" type="button" id="remove-work">确认删除</button></div>');
+  $('#delete-work-name').textContent='将从作品册中移除「'+work.name+'」。';
+  $('#remove-work').onclick=()=>{
+    works.splice(galleryIndex,1);
+    save();modal.close();renderGallery();
+    $(works.length?'#gallery-delete':'#gallery-title').focus();
+  };
+};
 $('#import-open').onclick=()=>{if(!state.ironing) openImport();};
 $('#modal-close').onclick=()=>modal.close();
 modal.addEventListener('click',event=>{if(event.target.closest('[data-dismiss]')) modal.close();});
